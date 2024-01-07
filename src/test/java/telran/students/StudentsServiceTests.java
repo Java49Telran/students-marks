@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.MongoTransactionManager;
 
 import telran.exceptions.NotFoundException;
 import telran.students.dto.Mark;
@@ -22,11 +24,14 @@ StudentsService studentsService;
 	@Autowired
 	DbTestCreation dbCreation;
 	@Autowired
-StudentRepo studentRepo;	
+StudentRepo studentRepo;
+	@MockBean
+	MongoTransactionManager transactionManager;
 	@BeforeEach
 	void setUp() {
 		dbCreation.createDB();
 	}
+	
 	@Test
 	void getMarksTest() {
 		Mark[] marksActual = studentsService.getMarks(1).toArray(Mark[]::new);
@@ -36,7 +41,9 @@ StudentRepo studentRepo;
 	}
 	@Test
 	void removeStudentTest() {
+		assertNotNull(studentRepo.findById(1l).orElse(null));
 		assertEquals(dbCreation.getStudent(1), studentsService.removeStudent(1));
+		assertNull(studentRepo.findById(1l).orElse(null));
 		assertThrowsExactly(NotFoundException.class, ()->studentsService.removeStudent(1));
 	}
 	@Test
@@ -51,9 +58,9 @@ StudentRepo studentRepo;
 	
 	@Test
 	void updatePhoneTest() {
-		Student student1 = dbCreation.getStudent(3);
+		Student student3 = dbCreation.getStudent(3);
 		String newPhone = "055-5555555";
-		Student expected = new Student(student1.id(), student1.name(), newPhone);
+		Student expected = new Student(student3.id(), student3.name(), newPhone);
 		assertEquals(expected, studentsService.updatePhone(3, newPhone));
 		Student actual = studentRepo.findById(3l).orElseThrow().build();
 		assertEquals(expected, actual);
@@ -68,7 +75,46 @@ StudentRepo studentRepo;
 		assertEquals(newStudent, actual);
 		assertThrowsExactly(IllegalStateException.class,
 				()-> studentsService.addStudent(studentExisting));
+		assertThrowsExactly(IllegalStateException.class,
+				()-> studentsService.addStudent(newStudent));
 	}
-
+	@Test
+	void getStudentPhoneTest() {
+		Student student2 = dbCreation.getStudent(2);
+		assertEquals(student2, studentsService.getStudentByPhone(DbTestCreation.PONE_2));
+		assertNull(studentsService.getStudentByPhone("kuku"));
+	}
+	@Test
+	void getStudentsPhonePrefixTest() {
+		List<Student> expected = List.of(dbCreation.getStudent(2));
+		String phonePrefix = DbTestCreation.PONE_2.substring(0, 3);
+		List<Student> actual = studentsService.getStudentsByPhonePrefix(phonePrefix);
+		assertIterableEquals(expected, actual);
+		assertTrue(studentsService.getStudentsByPhonePrefix("kuku").isEmpty());
+	}
+	@Test
+	void getGoodStudentsTest() {
+		List<Student> expected = List.of(dbCreation.getStudent(4), dbCreation.getStudent(6));
+		List<Student> actual = studentsService.getStudentsAllGoodMarks(70);
+		assertIterableEquals(expected, actual);
+		assertTrue(studentsService.getStudentsAllGoodMarks(100).isEmpty());
+	}
+	@Test
+	void getStudentsFewMarksTest() {
+		List<Student> expected = List.of(dbCreation.getStudent(2), dbCreation.getStudent(7));
+		List<Student> actual = studentsService.getStudentsFewMarks(2);
+		assertIterableEquals(expected, actual);
+		assertTrue(studentsService.getStudentsFewMarks(0).isEmpty());
+	}
+	@Test
+	void getGoodStudentsSubjectTest() {
+		//TODO
+		
+	}
+	@Test
+	void getStudentsMarksAmountBetween() {
+		//TODO
+	}
+	
 
 }
