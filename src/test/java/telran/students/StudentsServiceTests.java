@@ -141,6 +141,18 @@ StudentRepo studentRepo;
 		List<NameAvgScore> actual = studentsService.getStudentAvgScoreGreater(90);
 		assertIterableEquals(expected, actual);
 	}
+	@Test
+	void getStudentMarksAtDatesTest() {
+		//TODO
+	}
+	@Test
+	void getBestStudentsTest() {
+		//TODO
+	}
+	@Test
+	void getWorstStudentsTest() {
+		//TODO
+	}
 	
 
 }

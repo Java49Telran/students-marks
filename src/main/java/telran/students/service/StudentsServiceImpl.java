@@ -1,5 +1,6 @@
 package telran.students.service;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
@@ -176,6 +177,32 @@ final MongoTemplate mongoTemplate;
 						d.getDouble("avgMark").intValue())).toList();
 		log.debug("result: {}", res);
 		return res;
+	}
+
+	@Override
+	public List<Mark> getStudentMarksAtDates(long id, LocalDate from, LocalDate to) {
+		// TODO 
+		//returns list of Mark objects of the required student at the given dates
+		//Filtering and projection should be done at DB server
+		return null;
+	}
+
+	@Override
+	public List<String> getBestStudents(int nStudents) {
+		// TODO 
+		//returns list of a given number of the best students
+		//Best students are the ones who have most scores greater than 80
+		return null;
+	}
+
+	@Override
+	public List<String> getWorstStudents(int nStudents) {
+		// TODO 
+		//returns list of a given number of the worst students
+		//Worst students are the ones who have least sum's of all scores
+		//Students who have no scores at all should be considered as worst
+		//instead of GroupOperation to apply AggregationExpression (with AccumulatorOperators.Sum) and ProjectionOperation for adding new fields with computed values 
+		return null;
 	}
 
 }
